@@ -8,36 +8,18 @@ function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="flex items-center space-x-2 text-sm text-gray-400">
             <Heart className="w-4 h-4 text-red-400" />
-            <span>Made with passion by developers for developers</span>
+            <span>Made with love by ShadesOfDeath</span>
           </div>
           
           <div className="flex items-center space-x-6">
             <a
-              href="https://github.com/yourusername/winget-store"
+              href="https://github.com/shadesofdeath/Winget"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-white transition-colors"
               title="View source on GitHub"
             >
               <Github className="w-5 h-5" />
-            </a>
-            <a
-              href="https://twitter.com/yourusername"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-400 hover:text-white transition-colors"
-              title="Follow us on Twitter"
-            >
-              <Twitter className="w-5 h-5" />
-            </a>
-            <a
-              href="https://yourwebsite.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-400 hover:text-white transition-colors"
-              title="Visit our website"
-            >
-              <Globe className="w-5 h-5" />
             </a>
           </div>
         </div>
