@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Package as PackageType } from '../types';
-import { Terminal, ExternalLink, Copy, Check, Globe } from 'lucide-react';
-import PackageStats from './PackageStats';
+import { Terminal, ExternalLink, Copy, Check, Globe, Tag, Info } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface PackageCardProps {
   package: PackageType;
@@ -12,7 +12,7 @@ interface PackageCardProps {
 function PackageCard({ package: pkg, isSelected, onToggleSelect }: PackageCardProps) {
   const [copied, setCopied] = useState(false);
   const installCommand = `winget install -e --id ${pkg.Id}`;
-  const logoUrl = `https://logo.clearbit.com/${pkg.Latest.Homepage?.replace(/^https?:\/\//, '')}`;
+  const logoUrl = pkg.Logo || pkg.IconUrl || `https://logo.clearbit.com/${pkg.Latest.Homepage?.replace(/^https?:\/\//, '')}`;
 
   const copyCommand = async () => {
     await navigator.clipboard.writeText(installCommand);
@@ -24,7 +24,7 @@ function PackageCard({ package: pkg, isSelected, onToggleSelect }: PackageCardPr
     <div 
       className={`
         relative group overflow-hidden
-        bg-white/5 backdrop-blur-xl rounded-xl p-6
+        bg-white/5 backdrop-blur-xl rounded-xl
         border border-white/10 hover:border-blue-500/50
         transition-all duration-300
         ${isSelected ? 'ring-2 ring-blue-500 border-transparent' : ''}
@@ -32,9 +32,22 @@ function PackageCard({ package: pkg, isSelected, onToggleSelect }: PackageCardPr
     >
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       
-      <div className="relative">
+      {pkg.Banner && (
+        <div className="w-full h-32 overflow-hidden rounded-t-xl">
+          <img
+            src={pkg.Banner}
+            alt={pkg.Latest.Name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+      
+      <div className="p-6">
         <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-4">
+          <Link 
+            to={`/package/${pkg.Id}`}
+            className="flex items-center space-x-4 group/title"
+          >
             <img
               src={logoUrl}
               alt={pkg.Latest.Name}
@@ -44,10 +57,12 @@ function PackageCard({ package: pkg, isSelected, onToggleSelect }: PackageCardPr
               }}
             />
             <div>
-              <h3 className="text-lg font-semibold text-white">{pkg.Latest.Name}</h3>
+              <h3 className="text-lg font-semibold text-white group-hover/title:text-blue-400 transition-colors">
+                {pkg.Latest.Name}
+              </h3>
               <p className="text-sm text-gray-400">{pkg.Latest.Publisher}</p>
             </div>
-          </div>
+          </Link>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -59,46 +74,55 @@ function PackageCard({ package: pkg, isSelected, onToggleSelect }: PackageCardPr
           </label>
         </div>
 
-        <p className="mt-4 text-sm text-gray-300 line-clamp-2">
-          {pkg.Latest.Description || 'No description available'}
-        </p>
+        <div className="mt-4">
+          <p className="text-sm text-gray-300 line-clamp-2">
+            {pkg.Latest.Description || 'No description available'}
+          </p>
+        </div>
 
-        {pkg.Latest.Tags && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {pkg.Latest.Tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="px-3 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10"
-              >
-                {tag}
-              </span>
-            ))}
+        {pkg.Latest.Tags && pkg.Latest.Tags.length > 0 && (
+          <div className="mt-4 flex items-center space-x-2">
+            <Tag className="w-4 h-4 text-gray-400" />
+            <div className="flex flex-wrap gap-2">
+              {pkg.Latest.Tags.slice(0, 3).map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-1 text-xs rounded-full bg-white/5 text-gray-300 border border-white/10"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           </div>
         )}
 
-        <div className="mt-4">
-          <PackageStats
-            downloads={Math.floor(Math.random() * 1000000)} // Example data
-            lastUpdated={new Date(pkg.UpdatedAt)}
-          />
+        <div className="mt-4 space-y-2 text-sm text-gray-400">
+          {pkg.Latest.License && (
+            <div className="flex items-center space-x-2">
+              <Info className="w-4 h-4" />
+              <span>License: {pkg.Latest.License}</span>
+            </div>
+          )}
         </div>
 
-        <div className="mt-4 flex items-center justify-between bg-white/5 rounded-lg p-3 border border-white/10">
-          <div className="flex items-center space-x-2">
-            <Terminal className="w-4 h-4 text-blue-400" />
-            <code className="text-sm text-gray-300">{installCommand}</code>
+        <div className="mt-4 bg-white/5 rounded-lg p-3 border border-white/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Terminal className="w-4 h-4 text-blue-400" />
+              <code className="text-sm text-gray-300">{installCommand}</code>
+            </div>
+            <button
+              onClick={copyCommand}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              title="Copy install command"
+            >
+              {copied ? (
+                <Check className="w-4 h-4 text-green-400" />
+              ) : (
+                <Copy className="w-4 h-4 text-gray-400" />
+              )}
+            </button>
           </div>
-          <button
-            onClick={copyCommand}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            title="Copy install command"
-          >
-            {copied ? (
-              <Check className="w-4 h-4 text-green-400" />
-            ) : (
-              <Copy className="w-4 h-4 text-gray-400" />
-            )}
-          </button>
         </div>
 
         {pkg.Latest.Homepage && (
